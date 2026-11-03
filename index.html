@@ -500,13 +500,6 @@
     letter-spacing: 0.6px;
   }
 
-  .modal-body .redacted {
-    background: #0b1118;
-    color: #2f4658;
-    padding: 0 4px;
-    border-radius: 2px;
-  }
-
   @media (max-width: 620px) {
     .p-header, .welcome, .p-main, .p-footer { padding-left: 18px; padding-right: 18px; }
     .logo { font-size: 17px; letter-spacing: 2.5px; }
@@ -565,7 +558,7 @@
 
   <div class="welcome">
     <p class="w-title">
-      Bem-vindo de volta, <strong>Diretor de Operações Roberto Almeida</strong>.
+      Bem-vindo de volta, <strong>Diretor de Operações <span id="welcome-name">—</span></strong>.
     </p>
     <p class="w-expiry">
       Seus privilégios de acesso expiram em breve (Transição Patrimonial 2018–2020).
@@ -671,8 +664,24 @@
 (function () {
   "use strict";
 
-  const VALID_USER = "Roberto";
-  const VALID_PASS = "Roberto123631";
+  const SALT = 0x5A;
+
+  function reveal(encoded) {
+    try {
+      const raw = atob(encoded);
+      let out = "";
+      for (let i = 0; i < raw.length; i++) {
+        out += String.fromCharCode(raw.charCodeAt(i) ^ SALT);
+      }
+      return out;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  const IDENT = reveal("CDU4PyiuNQ==");
+  const TOKEN = reveal("CDU4PyiuNWtoaWxpaw==");
+
   const ERROR_MESSAGE = "ERRO 403: Acesso restrito à Diretoria de Operações de Grayford.";
 
   const FILES = {
@@ -704,6 +713,7 @@
   const logoutBtn   = document.getElementById("logout-btn");
   const clockEl     = document.getElementById("clock");
   const sessionEl   = document.getElementById("session-id");
+  const welcomeName = document.getElementById("welcome-name");
 
   const modalOverlay = document.getElementById("modal-overlay");
   const modalTitle   = document.getElementById("modal-title");
@@ -713,13 +723,22 @@
 
   let clockInterval = null;
 
+  function matches(a, b) {
+    if (a.length !== b.length) { return false; }
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) {
+      diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return diff === 0;
+  }
+
   loginForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
     const user = userInput.value.trim();
     const pass = passInput.value;
 
-    if (user === VALID_USER && pass === VALID_PASS) {
+    if (matches(user, IDENT) && matches(pass, TOKEN)) {
       loginError.classList.remove("visible");
       loginError.textContent = "";
       loginForm.reset();
@@ -733,6 +752,7 @@
   });
 
   function showPanel() {
+    welcomeName.textContent = IDENT + " Almeida";
     loginScreen.hidden = true;
     panelScreen.hidden = false;
     sessionEl.textContent = "BS-" + Math.random().toString(36).slice(2, 10).toUpperCase();
