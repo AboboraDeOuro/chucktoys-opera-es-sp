@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grayford Industries — Intranet Corporativa</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #b9b9b0;
+    background-image: linear-gradient(#cfcfc6 0%, #a8a8a0 55%, #8e8e86 100%);
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    background: #e9e7e1;
+    border: 1px solid #75756d;
+    box-shadow: 3px 3px 0 rgba(60, 60, 55, 0.45);
+  }
+
+  .login-titlebar {
+    background: #3d5168;
+    background-image: linear-gradient(#546e8a, #2c3c4e);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.6px;
+    padding: 7px 10px;
+    border-bottom: 1px solid #1c2732;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: uppercase;
+  }
+
+  .login-titlebar span.dots {
+    font-weight: normal;
+    letter-spacing: 2px;
+    opacity: 0.75;
+  }
+
+  .login-body { padding: 20px 22px 18px 22px; }
+
+  .login-subhead {
+    font-size: 11px;
+    color: #55554e;
+    text-align: center;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #cfcdc5;
+    letter-spacing: 0.4px;
+  }
+
+  .login-body label {
+    display: block;
+    font-size: 11px;
+    color: #3a3a34;
+    font-weight: bold;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .login-body input[type="text"],
+  .login-body input[type="password"] {
+    width: 100%;
+    padding: 6px 7px;
+    margin-bottom: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #1c1c18;
+    background: #ffffff;
+    border: 1px solid #8b8b82;
+    border-top-color: #6c6c64;
+    border-left-color: #6c6c64;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.12);
+    outline: none;
+  }
+
+  .login-body input:focus {
+    border-color: #4a6b8c;
+    background: #fbfbfa;
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 7px 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    color: #23231e;
+    background: #dedcd4;
+    background-image: linear-gradient(#f2f0ea, #cfcdc4);
+    border: 1px solid #75756d;
+    border-top-color: #f7f6f2;
+    border-left-color: #f7f6f2;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .login-btn:hover { background-image: linear-gradient(#fbfaf6, #d8d6cd); }
+  .login-btn:active {
+    background-image: linear-gradient(#c8c6bd, #e2e0d8);
+    border-top-color: #75756d;
+    border-left-color: #75756d;
+    border-bottom-color: #f7f6f2;
+    border-right-color: #f7f6f2;
+  }
+
+  #login-error {
+    display: none;
+    margin: 0 0 14px 0;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #8c1616;
+    background: #f7e3e3;
+    border: 1px solid #c79393;
+    border-left: 4px solid #a32020;
+  }
+
+  #login-error.visible { display: block; }
+
+  .login-footer {
+    margin-top: 22px;
+    font-size: 10.5px;
+    color: #5f5f58;
+    text-align: center;
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+  }
+
+  .login-footer .sep { color: #8a8a82; }
+
+  #panel-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #0d151f;
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(56, 122, 190, 0.16), transparent 55%),
+      radial-gradient(circle at 92% 110%, rgba(40, 90, 145, 0.14), transparent 55%);
+    color: #dfe7f0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #panel-screen[hidden] { display: none; }
+  #login-screen[hidden] { display: none; }
+
+  .p-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 30px;
+    background: #101a26;
+    border-bottom: 1px solid #1e2c3c;
+    flex-wrap: wrap;
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+
+  .logo {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+
+  .logo .star {
+    display: inline-block;
+    color: #58a6ff;
+    transform: translateY(-1px);
+    margin-right: 8px;
+  }
+
+  .tagline {
+    font-size: 11px;
+    letter-spacing: 1.6px;
+    color: #6f8bab;
+    text-transform: uppercase;
+  }
+
+  .p-header-right { display: flex; align-items: center; gap: 16px; }
+
+  .clock {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+    color: #6f8bab;
+    letter-spacing: 0.5px;
+  }
+
+  #logout-btn {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9fb6ce;
+    background: transparent;
+    border: 1px solid #2b3d51;
+    border-radius: 3px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  #logout-btn:hover {
+    background: #17232f;
+    color: #ffffff;
+    border-color: #3d5b7a;
+  }
+
+  .welcome {
+    padding: 22px 30px;
+    background: #111c28;
+    border-bottom: 1px solid #1a2836;
+  }
+
+  .welcome p { margin: 0; }
+
+  .welcome .w-title {
+    font-size: 15px;
+    color: #e8f0f8;
+    line-height: 1.6;
+  }
+
+  .welcome .w-title strong { color: #ffffff; font-weight: 600; }
+
+  .welcome .w-expiry {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #7d93a8;
+    letter-spacing: 0.2px;
+  }
+
+  .welcome .w-expiry .pill {
+    display: inline-block;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.6px;
+    color: #c9a84a;
+    border: 1px solid #4a3f1d;
+    background: #1c1a10;
+    border-radius: 2px;
+    padding: 1px 7px;
+    margin-left: 6px;
+  }
+
+  .p-main {
+    flex: 1;
+    padding: 26px 30px 40px 30px;
+    max-width: 1080px;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #5e7a94;
+    margin: 0 0 4px 0;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #eaf1f8;
+    margin: 0 0 20px 0;
+  }
+
+  .explorer {
+    border: 1px solid #1e2c3c;
+    border-radius: 4px;
+    background: #0f1923;
+    overflow: hidden;
+  }
+
+  .explorer-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #14202c;
+    border-bottom: 1px solid #1e2c3c;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 11.5px;
+    color: #7f97ad;
+    letter-spacing: 0.4px;
+  }
+
+  .explorer-bar .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #58a6ff;
+    box-shadow: 0 0 8px rgba(88, 166, 255, 0.7);
+    flex: 0 0 auto;
+  }
+
+  .folder { border-bottom: 1px solid #17242f; }
+  .folder:last-child { border-bottom: none; }
+
+  .folder-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 16px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12.5px;
+    color: #b6c8da;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    transition: background 0.14s, color 0.14s;
+  }
+
+  .folder-head:hover { background: #14202c; color: #e2edf7; }
+
+  .folder-head .caret {
+    margin-left: auto;
+    font-size: 10px;
+    color: #4f6a83;
+    transition: transform 0.18s;
+  }
+
+  .folder.open .folder-head .caret { transform: rotate(90deg); }
+  .folder.open .folder-head { color: #ffffff; }
+
+  .folder-body {
+    display: none;
+    padding: 4px 0 10px 0;
+    background: #0c141d;
+  }
+
+  .folder.open .folder-body { display: block; }
+
+  .file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px 9px 44px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+    color: #8fa8bf;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    border-left: 2px solid transparent;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+
+  .file:hover {
+    background: #15222e;
+    color: #ffffff;
+    border-left-color: #58a6ff;
+  }
+
+  .file .ext {
+    margin-left: auto;
+    font-size: 9.5px;
+    letter-spacing: 1px;
+    color: #4b6379;
+    text-transform: uppercase;
+  }
+
+  .p-footer {
+    padding: 0 30px 34px 30px;
+    max-width: 1080px;
+    width: 100%;
+  }
+
+  .system-alert {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #ff6b6b;
+    background: #1d0f11;
+    border: 1px solid #4a1d21;
+    border-left: 4px solid #c0392b;
+    border-radius: 3px;
+    animation: alertPulse 2.6s ease-in-out infinite;
+  }
+
+  @keyframes alertPulse {
+    0%, 100% { border-left-color: #c0392b; box-shadow: 0 0 0 rgba(192, 57, 43, 0); }
+    50%      { border-left-color: #ff4d4d; box-shadow: 0 0 16px rgba(192, 57, 43, 0.28); }
+  }
+
+  .system-alert .icon { flex: 0 0 auto; font-size: 14px; }
+
+  .system-alert strong { color: #ff8a8a; }
+
+  .fineprint {
+    margin-top: 18px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10px;
+    color: #3f5568;
+    letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(4, 8, 12, 0.82);
+    backdrop-filter: blur(2px);
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  #modal-overlay.visible { display: flex; align-items: flex-start; justify-content: center; }
+
+  .modal {
+    width: 100%;
+    max-width: 620px;
+    margin: auto;
+    background: #101b26;
+    border: 1px solid #24384b;
+    border-radius: 4px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+    animation: modalIn 0.16s ease-out;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #14212d;
+    border-bottom: 1px solid #24384b;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+    color: #cfe0ef;
+    letter-spacing: 0.3px;
+  }
+
+  .modal-head .filepath {
+    color: #5e7a94;
+    font-size: 10.5px;
+    margin-left: 4px;
+  }
+
+  .modal-close {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid #2b3d51;
+    border-radius: 3px;
+    color: #9fb6ce;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    letter-spacing: 0.6px;
+  }
+
+  .modal-close:hover { background: #1b2a38; color: #ffffff; border-color: #3d5b7a; }
+
+  .modal-body {
+    padding: 20px 22px 24px 22px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: #a9c0d4;
+    white-space: pre-wrap;
+  }
+
+  .modal-body .meta {
+    display: block;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #22384b;
+    font-size: 10.5px;
+    color: #4f6a83;
+    letter-spacing: 0.6px;
+  }
+
+  .modal-body .redacted {
+    background: #0b1118;
+    color: #2f4658;
+    padding: 0 4px;
+    border-radius: 2px;
+  }
+
+  @media (max-width: 620px) {
+    .p-header, .welcome, .p-main, .p-footer { padding-left: 18px; padding-right: 18px; }
+    .logo { font-size: 17px; letter-spacing: 2.5px; }
+    .tagline { font-size: 9.5px; letter-spacing: 1px; }
+    .file { padding-left: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-titlebar">
+      <span>Grayford Industries — Intranet</span>
+      <span class="dots">_ □ ×</span>
+    </div>
+
+    <div class="login-body">
+      <p class="login-subhead">
+        AUTENTICAÇÃO DE USUÁRIO<br>
+        <span style="font-size:10px; color:#77776f;">Domínio: GRAYFORD-OPS &nbsp;|&nbsp; Servidor: SRV-DIR-04</span>
+      </p>
+
+      <div id="login-error" role="alert"></div>
+
+      <form id="login-form" autocomplete="off" novalidate>
+        <label for="user">Usuário</label>
+        <input type="text" id="user" name="user" spellcheck="false" autocomplete="off">
+
+        <label for="pass">Senha</label>
+        <input type="password" id="pass" name="pass" autocomplete="off">
+
+        <button type="submit" class="login-btn">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    © 2011 Grayford Industries — Diretoria de Operações<br>
+    <span class="sep">·</span> Intranet Corporativa v2.1.4 <span class="sep">·</span> Acesso monitorado
+  </div>
+</div>
+
+<div id="panel-screen" hidden>
+
+  <header class="p-header">
+    <div class="brand">
+      <div class="logo"><span class="star">✦</span>Brightstar</div>
+      <div class="tagline">Future of Interactive Entertainment</div>
+    </div>
+    <div class="p-header-right">
+      <div class="clock" id="clock">--:--:--</div>
+      <button id="logout-btn" type="button">Encerrar Sessão</button>
+    </div>
+  </header>
+
+  <div class="welcome">
+    <p class="w-title">
+      Bem-vindo de volta, <strong>Diretor de Operações Roberto Almeida</strong>.
+    </p>
+    <p class="w-expiry">
+      Seus privilégios de acesso expiram em breve (Transição Patrimonial 2018–2020).
+      <span class="pill">REVISÃO PENDENTE</span>
+    </p>
+  </div>
+
+  <main class="p-main">
+    <p class="section-label">Repositório Interno</p>
+    <h1 class="section-title">Arquivos Confidenciais — Diretoria de Operações</h1>
+
+    <div class="explorer">
+      <div class="explorer-bar">
+        <span class="dot"></span>
+        <span>/ root / directorate_ops / restricted /</span>
+      </div>
+
+      <div class="folder">
+        <button class="folder-head" type="button">
+          <span>📂</span>
+          <span>/AUDITORIA_PATRIMONIAL_2018/</span>
+          <span class="caret">▶</span>
+        </button>
+        <div class="folder-body">
+          <div class="file"
+               data-file="Relatorio_Avaliacao_Maquinas.pdf"
+               data-path="/AUDITORIA_PATRIMONIAL_2018/">
+            <span>📄</span>
+            <span>Relatorio_Avaliacao_Maquinas.pdf</span>
+            <span class="ext">PDF</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="folder">
+        <button class="folder-head" type="button">
+          <span>📂</span>
+          <span>/LOGS_DE_SEGURANCA_EX_FUNCIONARIOS/</span>
+          <span class="caret">▶</span>
+        </button>
+        <div class="folder-body">
+          <div class="file"
+               data-file="Caso_Milo_Status.txt"
+               data-path="/LOGS_DE_SEGURANCA_EX_FUNCIONARIOS/">
+            <span>📄</span>
+            <span>Caso_Milo_Status.txt</span>
+            <span class="ext">TXT</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="folder">
+        <button class="folder-head" type="button">
+          <span>📂</span>
+          <span>/CADERNOS_WELLER_RECUPERADOS/</span>
+          <span class="caret">▶</span>
+        </button>
+        <div class="folder-body">
+          <div class="file"
+               data-file="Nota_Tecnica_Residuo.cfg"
+               data-path="/CADERNOS_WELLER_RECUPERADOS/">
+            <span>📄</span>
+            <span>Nota_Tecnica_Residuo.cfg</span>
+            <span class="ext">CFG</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="p-footer">
+    <div class="system-alert">
+      <span class="icon">⚠️</span>
+      <span>
+        <strong>AVISO DO SISTEMA:</strong>
+        Tentativa de login remoto detectada via terminal secundário do Almoxarifado
+        (Usuário: Marcus Vale). Se você não autorizou este acesso, altere suas credenciais imediatamente.
+      </span>
+    </div>
+
+    <div class="fineprint">
+      <span>BRIGHTSTAR INTERNAL SYSTEMS · NODE: BS-SRV-11 · BUILD 2018.4.7</span>
+      <span>SESSION ID: <span id="session-id">—</span></span>
+    </div>
+  </footer>
+
+</div>
+
+<div id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <span>📄</span>
+      <span id="modal-title">arquivo</span>
+      <span class="filepath" id="modal-path"></span>
+      <button class="modal-close" type="button" id="modal-close">FECHAR ✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const VALID_USER = "Roberto";
+  const VALID_PASS = "Roberto123Legal";
+  const ERROR_MESSAGE = "ERRO 403: Acesso restrito à Diretoria de Operações de Grayford.";
+
+  const FILES = {
+    "Relatorio_Avaliacao_Maquinas.pdf": {
+      meta: "CLASSIFICAÇÃO: CONFIDENCIAL · EMITIDO: 12/03/2018 · ORIGEM: Auditoria Patrimonial",
+      text:
+`A Brightstar assumiu o controle total dos ativos da Chuck Toys. O Depósito D-02 foi formalmente lacrado por nossa equipe de engenharia sob a justificativa de risco biológico e vazamento de fluidos industriais não identificados. Não há autorização para abertura manual dos compartimentos dos mascotes antigos (Felix, Chuck, Mary, Jack, Velvet).`
+    },
+
+    "Caso_Milo_Status.txt": {
+      meta: "CLASSIFICAÇÃO: RESTRITO · ÚLTIMA ATUALIZAÇÃO: 04/06/2019 · ORIGEM: RH / Segurança",
+      text:
+`STATUS: Arquivo de RH arquivado sem conclusão. O ex-funcionário Milo não se apresentou ao posto de trabalho após as vistorias perimetrais noturnas da fábrica desativada. Nenhuma movimentação bancária ou registro de credencial ativa no servidor local desde o incidente.`
+    },
+
+    "Nota_Tecnica_Residuo.cfg": {
+      meta: "CLASSIFICAÇÃO: CONFIDENCIAL · ARQUIVO RECUPERADO · ORIGEM: Laboratórios J. Weller",
+      text:
+`Amostras recuperadas dos laboratórios de J. Weller indicam flutuações elétricas anômalas quando expostas a ligas metálicas densas. O composto denominado 'Resíduo' reage à presença biológica ativa. Marcus Vale (Assistente de Almoxarifado) solicitou acesso a estas notas para 'organização de inventário'. Solicitação deferida pela junta de transição.`
+    }
+  };
+
+  const loginScreen = document.getElementById("login-screen");
+  const panelScreen = document.getElementById("panel-screen");
+  const loginForm   = document.getElementById("login-form");
+  const userInput   = document.getElementById("user");
+  const passInput   = document.getElementById("pass");
+  const loginError  = document.getElementById("login-error");
+  const logoutBtn   = document.getElementById("logout-btn");
+  const clockEl     = document.getElementById("clock");
+  const sessionEl   = document.getElementById("session-id");
+
+  const modalOverlay = document.getElementById("modal-overlay");
+  const modalTitle   = document.getElementById("modal-title");
+  const modalPath    = document.getElementById("modal-path");
+  const modalBody    = document.getElementById("modal-body");
+  const modalClose   = document.getElementById("modal-close");
+
+  let clockInterval = null;
+
+  loginForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const user = userInput.value.trim();
+    const pass = passInput.value;
+
+    if (user === VALID_USER && pass === VALID_PASS) {
+      loginError.classList.remove("visible");
+      loginError.textContent = "";
+      loginForm.reset();
+      showPanel();
+    } else {
+      loginError.textContent = ERROR_MESSAGE;
+      loginError.classList.add("visible");
+      passInput.value = "";
+      passInput.focus();
+    }
+  });
+
+  function showPanel() {
+    loginScreen.hidden = true;
+    panelScreen.hidden = false;
+    sessionEl.textContent = "BS-" + Math.random().toString(36).slice(2, 10).toUpperCase();
+    startClock();
+    window.scrollTo(0, 0);
+  }
+
+  logoutBtn.addEventListener("click", function () {
+    stopClock();
+    closeModal();
+    panelScreen.hidden = true;
+    loginScreen.hidden = false;
+    loginError.classList.remove("visible");
+    loginError.textContent = "";
+    loginForm.reset();
+    userInput.focus();
+  });
+
+  function startClock() {
+    stopClock();
+    updateClock();
+    clockInterval = setInterval(updateClock, 1000);
+  }
+
+  function stopClock() {
+    if (clockInterval !== null) {
+      clearInterval(clockInterval);
+      clockInterval = null;
+    }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    clockEl.textContent =
+      pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+  }
+
+  document.querySelectorAll(".folder-head").forEach(function (head) {
+    head.addEventListener("click", function () {
+      head.parentElement.classList.toggle("open");
+    });
+  });
+
+  document.querySelectorAll(".file").forEach(function (fileEl) {
+    fileEl.addEventListener("click", function () {
+      const fileName = fileEl.dataset.file;
+      const filePath = fileEl.dataset.path || "";
+      const data = FILES[fileName];
+
+      if (!data) { return; }
+
+      modalTitle.textContent = fileName;
+      modalPath.textContent = filePath;
+      modalBody.innerHTML = "";
+
+      const meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = data.meta;
+      modalBody.appendChild(meta);
+
+      modalBody.appendChild(document.createTextNode(data.text));
+
+      modalOverlay.classList.add("visible");
+      modalClose.focus();
+    });
+  });
+
+  function closeModal() {
+    modalOverlay.classList.remove("visible");
+  }
+
+  modalClose.addEventListener("click", closeModal);
+
+  modalOverlay.addEventListener("click", function (event) {
+    if (event.target === modalOverlay) { closeModal(); }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && modalOverlay.classList.contains("visible")) {
+      closeModal();
+    }
+  });
+
+  userInput.focus();
+
+})();
+</script>
+
+</body>
+</html>
